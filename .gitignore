@@ -1,4 +1,5 @@
 /vendor/
+<<<<<<< HEAD
 node_modules/
 npm-debug.log
 yarn-error.log
@@ -21,3 +22,36 @@ Homestead.yaml
 Homestead.json
 /.vagrant
 .phpunit.result.cache
+=======
+src/node_modules/
+src/npm-debug.log
+src/yarn-error.log
+
+# Laravel 4 specific
+src/bootstrap/compiled.php
+src/app/storage/
+
+# Laravel 5 & Lumen specific
+src/public/storage
+src/public/hot
+
+# Laravel 5 & Lumen specific with changed public path
+src/public_html/storage
+src/public_html/hot
+
+src/storage/*.key
+src/.env
+src/Homestead.yaml
+src/Homestead.json
+src/.vagrant
+src/.phpunit.result.cache
+
+.env
+/.phpunit.cache
+src/public/build
+/storage/*.key
+src/vendor
+src/auth.json
+/.idea
+/.vscode
+>>>>>>> 3162846 (First project commit)
