@@ -16,21 +16,17 @@ class SaleService
         $this->saleRepository = $saleRepository;
     }
 
-    public function createSale(array $productsData): void
+    public function createSale(array $productsData, int $quantity): int
     {
-        $products = [];
+        return $this->saleRepository->save($this->createSaleEntity($productsData, $quantity));
+    }
 
-        foreach ($productsData as $productData) {
-            $productId = $productData['product_id'];
-            $productName = $productData['product_name'];
-            $productPrice = $productData['product_price'];
-            $quantity = $productData['quantity'];
+    public function addProductsToSale(int $saleId, array $productsData, int $quantity): int
+    {
+        $sale = $this->saleRepository->getById($saleId);
+        $sale->addProducts($productsData, $quantity);
+        return $this->saleRepository->save($sale);
 
-            $products[] = new SaleProduct($productId, $productName, $productPrice, $quantity);
-        }
-
-        $sale = new Sale(0, collect($products));
-        $this->saleRepository->save($sale);
     }
 
     public function getSale(int $saleId): ?Sale
@@ -41,5 +37,24 @@ class SaleService
     public function getSales(): Collection
     {
         return $this->saleRepository->getAllSalesWithProducts();
+    }
+
+    private function createSaleEntity(array $productsData, int $quantity): Sale
+    {
+        $products = [];
+
+        foreach ($productsData as $product) {
+            $products[] = new SaleProduct($product['id'], $product['name'], $product['price'], $quantity);
+        }
+
+        return new Sale(0, collect($products));
+    }
+
+    public function cancelSale(int $saleId): void
+    {
+        $sale = $this->saleRepository->getById($saleId);
+        if ($sale) {
+            $this->saleRepository->delete($saleId);
+        }
     }
 }

@@ -17,6 +17,11 @@ class Sale implements JsonSerializable
         $this->products = $products;
     }
 
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
     public function getProducts(): Collection
     {
         return $this->products;
@@ -57,6 +62,13 @@ class Sale implements JsonSerializable
         ];
     }
 
+    public function addProducts(array $productsData, int $quantity): void
+    {
+        foreach ($productsData as $product) {
+            $this->products->push(new SaleProduct($product['id'], $product['name'], $product['price'], $quantity));
+        }
+    }
+
     public function jsonSerialize()
     {
         $groupedProducts = $this->groupProductsByIdAndSumQuantityPrice();
@@ -65,6 +77,11 @@ class Sale implements JsonSerializable
             'totalQuantity' => $this->getTotalQuantity(),
             'products' => array_values($groupedProducts)
         ];
+    }
+
+    public function cancel(): void
+    {
+        $this->products = new Collection();
     }
 
 }

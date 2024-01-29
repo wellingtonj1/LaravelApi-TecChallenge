@@ -7,22 +7,37 @@ use Modules\Sales\Domain\SaleRepositoryInterface;
 use App\Models\Sale as SaleModel;
 use Modules\Sales\Domain\SaleProduct;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class EloquentSaleRepository implements SaleRepositoryInterface
 {
-    public function save(Sale $sale): void
+    public function save(Sale $sale): int
     {
-        $saleModel = new SaleModel();
-        $saleModel->products()->sync($sale->getProducts()->map(function ($product) {
-            return [
-                'id' => $product->getProductId(),
-                'name' => $product->getProductName(),
-                'price' => $product->getProductPrice(),
-                'quantity' => $product->getQuantity(),
-            ];
-        })->all());
+        try {
+            DB::beginTransaction();
 
-        $saleModel->save();
+            $saleModel = $sale->getId() == 0 ? new SaleModel() : SaleModel::find($sale->getId());
+            $saleModel->save();
+
+            $newProducts = $sale->getProducts()->map(function ($product) use ($saleModel) {
+                return [
+                    'id' => 0,
+                    'sale_id' => $saleModel['id'],
+                    'product_id' => $product->getProductId(),
+                    'quantity' => $product->getQuantity(),
+                ];
+            })->all();
+
+            $saleModel->products()->detach();
+            $saleModel->products()->sync($newProducts);
+            $saleModel->save();
+
+            DB::commit();
+            return $saleModel->id;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new \Exception($e->getMessage());
+        }
     }
 
     public function getById(int $saleId): ?Sale
@@ -82,5 +97,10 @@ class EloquentSaleRepository implements SaleRepositoryInterface
         });
 
         return $salesWithProducts;
+    }
+
+    public function delete(int $saleId): void
+    {
+        SaleModel::destroy($saleId);
     }
 }

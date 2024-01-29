@@ -22,9 +22,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('/sales')->group(function () {
-    Route::post('/', [SaleController::class, 'createSale']);
-    Route::get('{saleId}', [SaleController::class, 'getSale']);
     Route::get('/', [SaleController::class, 'getSales']);
+    Route::get('/{saleId}', [SaleController::class, 'getSale']);
+    Route::post('/', [SaleController::class, 'createSale']);
+    Route::post('/{saleId}/add-product', [SaleController::class, 'addProductsToSale']);
+    Route::delete('/{saleId}', [SaleController::class, 'cancelSale']);
+
 });
 
 Route::get('/products', [ProductController::class, 'index']);
