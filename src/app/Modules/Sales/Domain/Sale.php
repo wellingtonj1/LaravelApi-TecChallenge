@@ -2,45 +2,69 @@
 
 namespace Modules\Sales\Domain;
 
-class Sale
+use Illuminate\Support\Collection;
+use JsonSerializable;
+
+
+class Sale implements JsonSerializable
 {
-    private int $productId;
-    private string $productName;
-    private float $productPrice;
-    private int $quantity;
+    private int $id;
+    private Collection $products;
 
-    public function __construct(int $productId, string $productName, float $productPrice, int $quantity)
+    public function __construct(int $id, Collection $products)
     {
-        $this->productId = $productId;
-        $this->productName = $productName;
-        $this->productPrice = $productPrice;
-        $this->quantity = $quantity;
+        $this->id = $id;
+        $this->products = $products;
     }
 
-    // Getters...
-    public function getProductId(): int
+    public function getProducts(): Collection
     {
-        return $this->productId;
+        return $this->products;
     }
 
-    public function getProductName(): string
+    public function getTotalQuantity(): int
     {
-        return $this->productName;
+        return $this->products->sum(function ($product) {
+            return $product->getQuantity();
+        });
     }
 
-    public function getProductPrice(): float
+    private function groupProductsByIdAndSumQuantityPrice(): array
     {
-        return $this->productPrice;
+        return $this->products->reduce(function ($carry, $product) {
+            $productId = $product->getProductId();
+
+            // Se já existe um registro para este productId, adicione a quantidade e preço
+            if (isset($carry[$productId])) {
+                $carry[$productId]['quantity'] += $product->getQuantity();
+                $carry[$productId]['price'] += $product->getQuantity() * $product->getProductPrice();
+            } else {
+                // Se não, crie um novo registro
+                $carry[$productId] = $this->createProductArray($product);
+            }
+
+            return $carry;
+        }, []);
     }
 
-    public function getQuantity(): int
+    private function createProductArray($product): array
     {
-        return $this->quantity;
+        return [
+            'product_id' => $product->getProductId(),
+            'name' => $product->getProductName(),
+            'price' => $product->getProductPrice() * $product->getQuantity(),
+            'quantity' => $product->getQuantity(),
+        ];
     }
 
-    public function getSubtotal(): float
+    public function jsonSerialize()
     {
-        return $this->productPrice * $this->quantity;
+        $groupedProducts = $this->groupProductsByIdAndSumQuantityPrice();
+        return [
+            'id' => $this->id,
+            'totalQuantity' => $this->getTotalQuantity(),
+            'products' => array_values($groupedProducts)
+        ];
     }
 
 }

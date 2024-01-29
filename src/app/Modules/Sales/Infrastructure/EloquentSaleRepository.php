@@ -5,17 +5,24 @@ namespace Modules\Sales\Infrastructure;
 use Modules\Sales\Domain\Sale;
 use Modules\Sales\Domain\SaleRepositoryInterface;
 use App\Models\Sale as SaleModel;
+use Modules\Sales\Domain\SaleProduct;
+use Illuminate\Support\Collection;
 
 class EloquentSaleRepository implements SaleRepositoryInterface
 {
     public function save(Sale $sale): void
     {
-        SaleModel::create([
-            'product_id' => $sale->getProductId(),
-            'product_name' => $sale->getProductName(),
-            'product_price' => $sale->getProductPrice(),
-            'quantity' => $sale->getQuantity(),
-        ]);
+        $saleModel = new SaleModel();
+        $saleModel->products()->sync($sale->getProducts()->map(function ($product) {
+            return [
+                'id' => $product->getProductId(),
+                'name' => $product->getProductName(),
+                'price' => $product->getProductPrice(),
+                'quantity' => $product->getQuantity(),
+            ];
+        })->all());
+
+        $saleModel->save();
     }
 
     public function getById(int $saleId): ?Sale
@@ -23,16 +30,57 @@ class EloquentSaleRepository implements SaleRepositoryInterface
         $saleModel = SaleModel::find($saleId);
 
         if ($saleModel) {
-            return new Sale(
-                $saleModel->product_id,
-                $saleModel->product_name,
-                $saleModel->product_price,
-                $saleModel->quantity
-            );
+            $products = $saleModel->products->map(function ($product) {
+                return new SaleProduct(
+                    $product->id,
+                    $product->name,
+                    $product->price,
+                    $product->pivot->quantity
+                );
+            });
+
+            return new Sale($saleModel->id,$products);
         }
 
         return null;
     }
 
-    // Implementar outros métodos de consulta...
+    public function getSaleWithProducts(int $saleId): ?Sale
+    {
+        $saleModel = SaleModel::with('products')->find($saleId);
+
+        if ($saleModel) {
+            $products = $saleModel->products->map(function ($product) {
+                return new SaleProduct(
+                    $product->id,
+                    $product->name,
+                    $product->price,
+                    $product->pivot->quantity
+                );
+            });
+
+            return new Sale($saleModel->id,$products);
+        }
+
+        return null;
+    }
+
+    public function getAllSalesWithProducts(): Collection
+    {
+        $sales = SaleModel::with('products')->get();
+        $salesWithProducts = $sales->map(function ($sale) {
+            $products = $sale->products->map(function ($product) {
+                return new SaleProduct(
+                    $product->id,
+                    $product->name,
+                    $product->price,
+                    $product->pivot->quantity
+                );
+            });
+
+            return new Sale($sale->id, collect($products));
+        });
+
+        return $salesWithProducts;
+    }
 }

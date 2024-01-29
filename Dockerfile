@@ -23,3 +23,9 @@ COPY . /var/www/html
 # Configure as permissões do Apache
 RUN chown -R www-data:www-data /var/www/html/src/storage
 RUN chmod -R 775 /var/www/html/src
+
+# Expor a porta 80
+EXPOSE 80
+
+# Comando para iniciar o Apache
+CMD ["apache2-foreground"]

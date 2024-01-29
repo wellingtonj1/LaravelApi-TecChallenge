@@ -4,6 +4,8 @@ namespace Modules\Sales\Application;
 
 use Modules\Sales\Domain\Sale;
 use Modules\Sales\Domain\SaleRepositoryInterface;
+use Modules\Sales\Domain\SaleProduct;
+use Illuminate\Support\Collection;
 
 class SaleService
 {
@@ -14,16 +16,30 @@ class SaleService
         $this->saleRepository = $saleRepository;
     }
 
-    public function createSale(int $productId, string $productName, float $productPrice, int $quantity): void
+    public function createSale(array $productsData): void
     {
-        $sale = new Sale($productId, $productName, $productPrice, $quantity);
+        $products = [];
+
+        foreach ($productsData as $productData) {
+            $productId = $productData['product_id'];
+            $productName = $productData['product_name'];
+            $productPrice = $productData['product_price'];
+            $quantity = $productData['quantity'];
+
+            $products[] = new SaleProduct($productId, $productName, $productPrice, $quantity);
+        }
+
+        $sale = new Sale(0, collect($products));
         $this->saleRepository->save($sale);
     }
 
     public function getSale(int $saleId): ?Sale
     {
-        return $this->saleRepository->getById($saleId);
+        return $this->saleRepository->getSaleWithProducts($saleId);
     }
 
-    // Outros métodos de consulta...
+    public function getSales(): Collection
+    {
+        return $this->saleRepository->getAllSalesWithProducts();
+    }
 }

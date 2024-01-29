@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Sales\Http\Controllers;
+namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -45,5 +45,9 @@ class SaleController extends Controller
         return response()->json($sale);
     }
 
-    // Outros métodos...
+    public function getSales()
+    {
+        $sales = $this->saleService->getSales();
+        return response()->json($sales);
+    }
 }
