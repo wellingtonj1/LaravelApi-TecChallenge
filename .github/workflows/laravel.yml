@@ -21,28 +21,6 @@ jobs:
         ports:
           - 33306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
- 
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Build Docker Image
-      run: docker build -t app .
-
-    - name: Run Docker Container
-      run: docker run -d --name cname --network host app
-      # Use '--network host' para que o Laravel acesse o MySQL na mesma rede do host
-
-    - name: Install Composer Dependencies
-      run: docker exec -t cname composer install --no-scripts
- 
-    - name: Prepare Laravel Application
-      run: |
-        cp .env.ci .env
-        docker exec -t cname php artisan key:generate
- 
-    - name: Execute tests
-      run: docker exec -t cname php artisan test
-
 
     # services:
     #   mysql:
@@ -59,19 +37,26 @@ jobs:
     #       --health-retries=3
     #     ports:
     #       - 3306:3306
+ 
+    steps:
+    - uses: actions/checkout@v3
 
-    # steps:
-    # - uses: actions/checkout@v3
+    - name: Build Docker Image
+      run: docker build -t app .
 
-    # - name: Build Docker Image
-    #   run: docker build -t app .
+    - name: Run Docker Container
+      run: docker run -d --name cname --network host app
 
-    # - name: Run Docker Container
-    #   run: docker run -d --name cname --network host app
-    #   # Use '--network host' para que o Laravel acesse o MySQL na mesma rede do host
-
-    # - name: Install Composer Dependencies
-    #   run: docker exec -t cname composer install --no-scripts
+    - name: Install Composer Dependencies
+      run: docker exec -t cname composer install --no-scripts
+ 
+    - name: Prepare Laravel Application
+      run: |
+        cp .env.ci .env
+        docker exec -t cname php artisan key:generate
+ 
+    - name: Execute tests
+      run: docker exec -t cname php artisan test
 
     # - name: Copy .env
     #   run: |
