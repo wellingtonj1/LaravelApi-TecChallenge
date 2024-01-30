@@ -2,7 +2,7 @@ name: Laravel
 
 on:
   push:
-    branches: [ "main" , "sandbox"]
+    branches: [ "main", "sandbox" ]
   pull_request:
     branches: [ "main" ]
 
@@ -24,6 +24,8 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
+        ports:
+          - 3306:3306
 
     steps:
     - uses: actions/checkout@v3
@@ -32,16 +34,17 @@ jobs:
       run: docker build -t app .
 
     - name: Run Docker Container
-      run: docker run -d --name cname app
+      run: docker run -d --name cname --network host app
+      # Use '--network host' para que o Laravel acesse o MySQL na mesma rede do host
 
     - name: Install Composer Dependencies
       run: docker exec -t cname composer install --no-scripts
 
     - name: Copy .env
-      run: docker exec -t cname php -r "file_exists('.env') || copy('.env.example', '.env');"
-
-    - name: Copy Laravel .env
-      run: docker exec -t cname php -r "file_exists('src/.env') || copy('src/.env.example', 'src/.env');"
+      run: |
+        docker exec -t cname cp .env.example .env
+        # Configurar .env para apontar para o serviço MySQL
+        docker exec -t cname sed -i 's/DB_HOST=127.0.0.1/DB_HOST=mysql/' .env
 
     - name: Generate key
       run: docker exec -t cname php artisan key:generate
