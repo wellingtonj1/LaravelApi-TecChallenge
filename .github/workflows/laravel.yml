@@ -50,4 +50,4 @@ jobs:
       run: docker exec -t cname chmod -R 777 storage bootstrap/cache
 
     - name: Execute PHPUnit tests
-      run: docker exec -t cname vendor/bin/phpunit
+      run: docker exec -t cname php artisan test
