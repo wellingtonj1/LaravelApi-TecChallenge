@@ -1,0 +1,51 @@
+name: Laravel
+
+on:
+  push:
+    branches: [ "main" , "test"]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  laravel-tests:
+
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: database
+          MYSQL_USER: user
+          MYSQL_PASSWORD: password
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build Docker Image
+      run: docker build -t app .
+
+    - name: Run Docker Container
+      run: docker run -d --name cname app
+
+    - name: Install Composer Dependencies
+      run: docker exec -t cname composer install --no-scripts
+
+    - name: Copy .env
+      run: docker exec -t cname php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+    - name: Generate key
+      run: docker exec -t cname php artisan key:generate
+
+    - name: Directory Permissions
+      run: docker exec -t cname chmod -R 777 storage bootstrap/cache
+
+    # TODO make it work
+    # - name: Execute PHPUnit tests
+      # run: docker exec -t cname vendor/bin/phpunit
