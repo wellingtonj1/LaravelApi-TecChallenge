@@ -49,6 +49,5 @@ jobs:
     - name: Directory Permissions
       run: docker exec -t cname chmod -R 777 storage bootstrap/cache
 
-    # TODO make it work
-    # - name: Execute PHPUnit tests
-      # run: docker exec -t cname vendor/bin/phpunit
+    - name: Execute PHPUnit tests
+      run: docker exec -t cname vendor/bin/phpunit
