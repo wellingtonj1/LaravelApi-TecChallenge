@@ -34,7 +34,7 @@ jobs:
  
     - name: Prepare Laravel Application
       run: |
-        cp .env.ci .env
+        cp .env.ci src/.env
         docker exec -t cname php artisan key:generate
  
     - name: Execute tests
