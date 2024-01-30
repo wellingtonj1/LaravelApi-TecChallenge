@@ -32,8 +32,7 @@ jobs:
       run: docker-compose exec -T app composer install --no-scripts
  
     - name: Copy .env
-      run: |
-        docker exec -t cname cp .env.example .env
+      run: docker-compose exec app cp .env.example .env
         
     - name: Run Migrations
       run: docker-compose exec app php artisan migrate
