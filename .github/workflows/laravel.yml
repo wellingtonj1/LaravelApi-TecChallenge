@@ -8,27 +8,24 @@ on:
 
 jobs:
   laravel-tests:
-
     runs-on: ubuntu-latest
-
+    container:
+      image: kirschbaumdevelopment/laravel-test-runner:7.3
+ 
     services:
       mysql:
         image: mysql:5.7
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: laravel
-          MYSQL_USER: adorei
-          MYSQL_PASSWORD: adoreimesmo
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: test
         ports:
-          - 3306:3306
-
+          - 33306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+ 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
 
     - name: Build Docker Image
       run: docker build -t app .
@@ -39,18 +36,11 @@ jobs:
 
     - name: Install Composer Dependencies
       run: docker exec -t cname composer install --no-scripts
-
-    - name: Copy .env
+ 
+    - name: Prepare Laravel Application
       run: |
-        docker exec -t cname cp .env.example .env
-        # Configurar src/.env para apontar para o serviço MySQL
-        docker exec -t cname sed -i 's/DB_HOST=127.0.0.1/DB_HOST=mysql/' .env
-
-    - name: Generate key
-      run: docker exec -t cname php artisan key:generate
-
-    - name: Directory Permissions
-      run: docker exec -t cname chmod -R 777 storage bootstrap/cache
-
-    - name: Execute PHPUnit tests
+        cp .env.ci .env
+        docker exec -t cname php artisan key:generate
+ 
+    - name: Execute tests
       run: docker exec -t cname php artisan test
