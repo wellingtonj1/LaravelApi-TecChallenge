@@ -32,8 +32,16 @@ jobs:
     - name: Install Composer Dependencies
       run: docker exec -t cname composer install --no-scripts
  
-    - name: Prepare Laravel Application
-      run: cp .env.ci src/.env
+    # - name: Prepare Laravel Application
+    #   run: cp .env.ci src/.env
+
+    - name: Copy .env
+      run: |
+        docker exec -t cname cp .env.example .env
+        # Configurar .env para apontar para o serviço MySQL
+        docker exec -t cname sed -i 's/DB_HOST=127.0.0.1/DB_HOST=mysql/' .env
+        # Copiar .env para o diretório 'src' onde o Laravel procura por padrão
+        docker exec -t cname cp .env src/.env
 
     - name: Generate key
       run: docker exec -t cname php artisan key:generate
