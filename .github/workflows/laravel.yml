@@ -23,38 +23,21 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Build Docker Image
-      run: docker build -t app .
-
-    - name: Run Docker Container
-      run: docker run -d --name cname --network host app
+    - name: Build and Run Docker Compose
+      run: |
+        docker-compose up -d
+        docker ps -a
 
     - name: Install Composer Dependencies
-      run: docker exec -t cname composer install --no-scripts
+      run: docker-compose exec app composer install --no-scripts
  
     - name: Copy .env
       run: |
         docker exec -t cname cp .env.example .env
         
-    - name: Generate key and migrate
-      run: |
-        docker exec -t cname php artisan key:generate
-        docker exec -t cname php artisan migrate
+    - name: Run Migrations
+      run: docker-compose exec app php artisan migrate
  
     - name: Execute tests
-      run: docker exec -t cname php artisan test
-
-    # - name: Copy .env
-    #   run: |
-    #     docker exec -t cname cp .env.example .env
-    #     # Configurar src/.env para apontar para o serviço MySQL
-    #     docker exec -t cname sed -i 's/DB_HOST=127.0.0.1/DB_HOST=mysql/' .env
-
-    # - name: Generate key
-    #   run: docker exec -t cname php artisan key:generate
-
-    # - name: Directory Permissions
-    #   run: docker exec -t cname chmod -R 777 storage bootstrap/cache
-
-    # - name: Execute PHPUnit tests
-    #   run: docker exec -t cname php artisan test
+      run: docker-compose exec app php artisan test
+    
