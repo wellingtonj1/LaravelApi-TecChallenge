@@ -57,6 +57,7 @@ class SaleService
         $sale = $this->saleRepository->getById($saleId);
         if ($sale) {
             $this->saleRepository->delete($saleId);
+            return;
         }
         throw new \Exception('Sale not found');
     }

@@ -1,0 +1,186 @@
+{
+	"info": {
+		"_postman_id": "25ca4fa2-242b-40c9-9544-8750536963f4",
+		"name": "LaravelChallengeApiDoc",
+		"description": "# 📄 Seja bem vinda(o) a documentação do Laravel Challenge API\n\nO entuito desta documentação, é informar os endpoints e a forma de ultilização do mesmo, assim como a estrutura que é retornada por cada endpoint do sistema.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "21714729"
+	},
+	"item": [
+		{
+			"name": "Produtos",
+			"item": [
+				{
+					"name": "List Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/products"
+					},
+					"response": []
+				}
+			],
+			"description": "Esta pasta armazena os endpoints que estão relacionados ao produto."
+		},
+		{
+			"name": "Vendas",
+			"item": [
+				{
+					"name": "List Sales",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/sales"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sale",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/sales/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sales",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Sales",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "product_id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "quantity",
+									"value": "10",
+									"type": "text"
+								}
+							]
+						},
+						"url": "{{baseUrl}}/sales"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Products Sale",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "product_id",
+									"value": "3",
+									"type": "text"
+								},
+								{
+									"key": "quantity",
+									"value": "4",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/sales/:sale_id/add-product",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sales",
+								":sale_id",
+								"add-product"
+							],
+							"variable": [
+								{
+									"key": "sale_id",
+									"value": "35"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Sale",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/sales/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sales",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "33"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Esta pasta agrupa os endpoints que estão ligadas a venda.. Seja buscar, atualizar, cancelar ou incluir um novo registro.\n\nRotas que envolvem uma venda especifica... por exemplo: adicionar novos produtos, busca especifica por id ou cancelar venda.... é necessário informar no parametro :id ou sale_id o id numérico da venda em questão."
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": {
+			"key": "X-API-Key",
+			"value": "{{token}}"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000/api"
+		}
+	]
+}

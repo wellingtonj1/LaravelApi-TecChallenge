@@ -6,7 +6,6 @@ use App\Models\Product;
 use Tests\TestCase;
 use Modules\Sales\Application\SaleService;
 use Modules\Sales\Domain\SaleRepositoryInterface;
-use Mockery;
 use Modules\Sales\Domain\Sale;
 
 class SaleServiceTest extends TestCase
