@@ -41,7 +41,7 @@ class Sale implements JsonSerializable
 
             // Se já existe um registro para este productId, adicione a quantidade e preço
             if (isset($carry[$productId])) {
-                $carry[$productId]['quantity'] += $product->getQuantity();
+                $carry[$productId]['amount'] += $product->getQuantity();
                 $carry[$productId]['price'] += $product->getQuantity() * $product->getProductPrice();
             } else {
                 // Se não, crie um novo registro
@@ -56,9 +56,9 @@ class Sale implements JsonSerializable
     {
         return [
             'product_id' => $product->getProductId(),
-            'name' => $product->getProductName(),
+            'nome' => $product->getProductName(),
             'price' => $product->getProductPrice() * $product->getQuantity(),
-            'quantity' => $product->getQuantity(),
+            'amount' => $product->getQuantity(),
         ];
     }
 
@@ -73,8 +73,8 @@ class Sale implements JsonSerializable
     {
         $groupedProducts = $this->groupProductsByIdAndSumQuantityPrice();
         return [
-            'id' => $this->id,
-            'totalQuantity' => $this->getTotalQuantity(),
+            'sales_id' => $this->id,
+            'amount' => $this->getTotalQuantity(),
             'products' => array_values($groupedProducts)
         ];
     }

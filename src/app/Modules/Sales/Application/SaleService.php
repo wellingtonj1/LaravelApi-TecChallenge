@@ -24,9 +24,11 @@ class SaleService
     public function addProductsToSale(int $saleId, array $productsData, int $quantity): int
     {
         $sale = $this->saleRepository->getById($saleId);
-        $sale->addProducts($productsData, $quantity);
-        return $this->saleRepository->save($sale);
-
+        if ($sale) {
+            $sale->addProducts($productsData, $quantity);
+            return $this->saleRepository->save($sale);
+        }
+        throw new \Exception('Sale not found');
     }
 
     public function getSale(int $saleId): ?Sale
@@ -56,5 +58,6 @@ class SaleService
         if ($sale) {
             $this->saleRepository->delete($saleId);
         }
+        throw new \Exception('Sale not found');
     }
 }

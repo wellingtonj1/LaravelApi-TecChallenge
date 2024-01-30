@@ -4,29 +4,23 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Product;
+use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
     public function run()
     {
-        Product::create([
-            'name' => 'Celular 1',
-            'price' => 1800.00,
-            'description' => 'Lorenzo Ipsulum',
-        ]);
+        $possibleNames = [
+            "Celular", "Notebook", "Computador", "Tablet", "Smartphone", "Smartwatch"
+        ];
 
-        Product::create([
-            'name' => 'Celular 2',
-            'price' => 3200.00,
-            'description' => 'Lorem ipsum dolor',
-        ]);
+        for ($i = 0; $i < 10; $i++) {
+            Product::create([
+                'name' => $possibleNames[array_rand($possibleNames)],
+                'price' => mt_rand(100, 1000),
+                'description' => Str::random(10)
+            ]);
+        }
 
-        Product::create([
-            'name' => 'Celular 3',
-            'price' => 9800.00,
-            'description' => 'Lorem ipsum dolor sit amet',
-        ]);
-
-        // Adicione mais produtos conforme necessário...
     }
 }

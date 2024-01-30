@@ -43,7 +43,6 @@ class EloquentSaleRepository implements SaleRepositoryInterface
     public function getById(int $saleId): ?Sale
     {
         $saleModel = SaleModel::find($saleId);
-
         if ($saleModel) {
             $products = $saleModel->products->map(function ($product) {
                 return new SaleProduct(

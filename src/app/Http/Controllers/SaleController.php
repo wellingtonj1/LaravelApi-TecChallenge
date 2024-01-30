@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use Illuminate\Support\Facades\Validator;
 use Modules\Sales\Application\SaleService;
 
 class SaleController extends Controller
@@ -18,34 +19,35 @@ class SaleController extends Controller
 
     public function createSale(Request $request)
     {
-        $data = $request->validate([
-            'product_id' => 'required|integer|exists:products,id',
-            'quantity' => 'required|integer'
-        ]);
-
-        $products = Product::whereId($data['product_id'])->get()->toArray();
-
-        $id = $this->saleService->createSale(
-            $products,
-            $data['quantity']
-        );
-
-        return response()->json(['id' => $id], 201);
+        $validator = $this->validateRequest($request);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+        try {
+            $products = Product::whereId($request['product_id'])->get()->toArray();
+            $id = $this->saleService->createSale(
+                $products,
+                $request['quantity']
+            );
+            return response()->json(['id' => $id], 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
     }
 
     public function addProductsToSale(Request $request, int $saleId)
     {
-        $data = $request->validate([
-            'product_id' => 'required|integer|exists:products,id',
-            'quantity' => 'required|integer'
-        ]);
-
-        $products = Product::whereId($data['product_id'])->get()->toArray();
-        // Adicione a lógica de validação conforme necessário
-
-        $this->saleService->addProductsToSale($saleId, $products, $data['quantity']);
-
-        return response()->json(['message' => 'Produtos adicionados à venda com sucesso'], 200);
+        $validator = $this->validateRequest($request);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+        try {
+            $products = Product::whereId($request['product_id'])->get()->toArray();
+            $this->saleService->addProductsToSale($saleId, $products, $request['quantity']);
+            return response()->json(['message' => 'Produtos adicionados à venda com sucesso'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
     }
 
     public function getSale($saleId)
@@ -65,7 +67,20 @@ class SaleController extends Controller
 
     public function cancelSale(int $saleId)
     {
-        $this->saleService->cancelSale($saleId);
-        return response()->json(['message' => 'Venda cancelada com sucesso'], 200);
+        try {
+            $this->saleService->cancelSale($saleId);
+            return response()->json(['message' => 'Venda cancelada com sucesso'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    private function validateRequest(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'product_id' => 'required|integer|exists:products,id',
+            'quantity' => 'required|integer'
+        ]);
+        return $validator;
     }
 }

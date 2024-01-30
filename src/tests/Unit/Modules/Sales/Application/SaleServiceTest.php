@@ -2,35 +2,77 @@
 
 namespace Tests\Unit\Modules\Sales\Application;
 
+use App\Models\Product;
 use Tests\TestCase;
 use Modules\Sales\Application\SaleService;
-use Modules\Sales\Domain\Sale;
 use Modules\Sales\Domain\SaleRepositoryInterface;
 use Mockery;
+use Modules\Sales\Domain\Sale;
 
 class SaleServiceTest extends TestCase
 {
     public function testCreateSale()
     {
-        $saleRepository = Mockery::mock(SaleRepositoryInterface::class);
-        $saleRepository->shouldReceive('save')->once();
-
+        $saleRepository = $this->app->make(SaleRepositoryInterface::class);
         $saleService = new SaleService($saleRepository);
+        $product = Product::first();
 
-        $saleService->createSale(1, 'Product 1', 100.00, 2);
+        $saleId = $saleService->createSale([$product], 10);
+        $this->assertIsInt($saleId);
+        // check if the get of the id is the same
+        $saleServiceGet = new SaleService($saleRepository);
+        $result = $saleServiceGet->getSale($saleId);
+        $this->assertInstanceOf(Sale::class, $result);
+    }
+
+    public function testAddProductsToSale()
+    {
+        $saleRepository = $this->app->make(SaleRepositoryInterface::class);
+        $saleService = new SaleService($saleRepository);
+        $product = Product::first();
+
+        $saleId = $saleService->createSale([$product], 10);
+
+        $saleRepository = $this->app->make(SaleRepositoryInterface::class);
+        $saleService = new SaleService($saleRepository);
+        $product = Product::get()[1];
+
+        $saleId = $saleService->addProductsToSale($saleId, [$product], 3);
+        $this->assertIsInt($saleId);
+
+        $saleServiceGet = new SaleService($saleRepository);
+        $result = $saleServiceGet->getSale($saleId);
+        $this->assertInstanceOf(Sale::class, $result);
+        $this->assertEquals(2, $result->getProducts()->count());
+
     }
 
     public function testGetSale()
     {
-        $saleRepository = Mockery::mock(SaleRepositoryInterface::class);
-        $saleRepository->shouldReceive('getById')->andReturn(new Sale(1, 'Product 1', 100.00, 2));
-
+        $saleRepository = $this->app->make(SaleRepositoryInterface::class);
         $saleService = new SaleService($saleRepository);
 
-        $result = $saleService->getSale(1);
-
-        $this->assertInstanceOf(Sale::class, $result);
-        $this->assertEquals(1, $result->getProductId());
-        // Outras asserções...
+        $result = $saleService->getSale(9999);
+        $this->assertNull($result);
     }
+
+    public function testGetSales()
+    {
+        $saleRepository = $this->app->make(SaleRepositoryInterface::class);
+        $saleService = new SaleService($saleRepository);
+
+        $result = $saleService->getSales();
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $result);
+    }
+
+    public function testCancelSale()
+    {
+        $saleRepository = $this->app->make(SaleRepositoryInterface::class);
+        $saleService = new SaleService($saleRepository);
+
+        $lastSale = $saleService->getSales()->last();
+        $this->expectException(\Exception::class);
+        $saleService->cancelSale($lastSale->getId());
+    }
+
 }
