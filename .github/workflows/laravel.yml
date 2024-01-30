@@ -42,9 +42,9 @@ jobs:
 
     - name: Copy .env
       run: |
-        docker exec -t cname cp src/.env.example src/.env
+        docker exec -t cname cp .env.example .env
         # Configurar src/.env para apontar para o serviço MySQL
-        docker exec -t cname sed -i 's/DB_HOST=127.0.0.1/DB_HOST=mysql/' src/.env
+        docker exec -t cname sed -i 's/DB_HOST=127.0.0.1/DB_HOST=mysql/' .env
 
     - name: Generate key
       run: docker exec -t cname php artisan key:generate
