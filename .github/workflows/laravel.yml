@@ -33,9 +33,10 @@ jobs:
       run: docker exec -t cname composer install --no-scripts
  
     - name: Prepare Laravel Application
-      run: |
-        cp .env.ci src/.env
-        docker exec -t cname php artisan key:generate
+      run: cp .env.ci src/.env
+
+    - name: Generate key
+      run: docker exec -t cname php artisan key:generate
  
     - name: Execute tests
       run: docker exec -t cname php artisan test
