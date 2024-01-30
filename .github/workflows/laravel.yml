@@ -36,8 +36,10 @@ jobs:
       run: |
         docker exec -t cname cp .env.example .env
         
-    - name: Generate key
-      run: docker exec -t cname php artisan key:generate
+    - name: Generate key and migrate
+      run: |
+        docker exec -t cname php artisan key:generate
+        docker exec -t cname php artisan migrate
  
     - name: Execute tests
       run: docker exec -t cname php artisan test
